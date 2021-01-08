@@ -1,4 +1,4 @@
-# File deduplication detector
+# File duplicate detector
 
 ## Overview
 
