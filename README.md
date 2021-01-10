@@ -8,14 +8,14 @@ The tool take a single folder and determine duplicates as output.
 
 ## Install and usage
 
-There are two version of this tool. 
+There are two version of this tool.
 
 * One in plain [Ruby](https://www.ruby-lang.org/en/)
-* One in compiled in [Crystal](https://crystal-lang.org/)
+* One in compiled [Crystal](https://crystal-lang.org/)
 
-The compiled version in Crystal is a bit faster than the Ruby version. 
+The compiled version in Crystal is a bit faster than the Ruby version.
 
-In the future there is an opportunaty to adapt the Crystal version to a parallel version to make use of all CPU cores. But as of version 0.35, Crystal still only support [concurrency](https://crystal-lang.org/reference/guides/concurrency.html) and not true parallelism.
+In the future there is an opportunity to adapt the Crystal version to a parallel version to make use of all CPU cores. But as of version 0.35, Crystal still only support [concurrency](https://crystal-lang.org/reference/guides/concurrency.html) and not true parallelism.
 
 ### Run ruby version
 
