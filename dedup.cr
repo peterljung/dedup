@@ -67,16 +67,33 @@ class Dedup
   def group_files_on_start(paths, size = 4096)
     ans = paths.group_by { |p|
       minsize = Math.min(File.size(p), size)
-      f = File.open(p)
-      Digest::MD5.hexdigest(f.read_string(minsize))
+      File.open(p) do |f|
+        Digest::SHA1.hexdigest(f.read_string(minsize))
+      end
     }
     ans.values.select { |g| g.size > 1 }
+  end
+
+  # Helper to calculate SHA1 in chunks
+  def sha1(path)
+    chunksize = 16384
+    chunk = Slice(UInt8).new(chunksize)
+    Digest::SHA1.hexdigest do |d|
+      File.open(path, "r") do |f|
+        n = f.read(chunk)
+        if n < chunksize
+          d.update chunk[0...n]
+        else
+          d.update chunk
+        end
+      end
+    end
   end
 
   # Return groups of paths that share same SHA256 hash
   def group_files_on_hash(paths)
     ans = paths.group_by { |p|
-      Digest::SHA1.hexdigest(File.read(p))
+      sha1(p)
     }
     ans.values.select { |g| g.size > 1 }
   end
@@ -96,7 +113,7 @@ class Dedup
       puts "Total number of analyzed files: #{file_stats.values.reduce { |acc, v| acc + v }}"
       puts "Number of files that share size with at least another file: #{files_w_size.values.flatten.size}"
       puts "Number of files that share size and file start with at least one other file: #{file_start_dups.flatten.size}"
-      puts "Number for files that share size and SHA256 hash with at least one other file: #{file_hash_dups.flatten.size}"
+      puts "Number for files that share size and hash (SHA1) with at least one other file: #{file_hash_dups.flatten.size}"
     end
     {file_hash_dups, file_stats}
   end

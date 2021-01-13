@@ -68,13 +68,17 @@ class Dedup
   
   # Return groups of paths that share same MD5 hash of first N bytes in file
   def group_files_on_start(paths, size=4096)
-    ans = paths.group_by { |p| Digest::MD5.hexdigest(p.read(size)) }
+    ans = paths.group_by { |p| 
+      File.open(p) do |f|
+        Digest::SHA1.hexdigest(f.read(size))
+      end
+    }
     ans.values.select { |g| g.size > 1 }
   end
   
   # Return groups of paths that share same SHA256 hash
   def group_files_on_hash(paths)
-    ans = paths.group_by { |p| Digest::SHA256.file(p).to_s }
+    ans = paths.group_by { |p| Digest::SHA1.file(p).to_s }
     ans.values.select { |g| g.size > 1 }
   end
 
@@ -94,7 +98,7 @@ class Dedup
       puts "Total number of analyzed files: " + file_stats.values.reduce(:+).to_s
       puts "Number of files that share size with at least another file: " + files_w_size.values.flatten.size.to_s
       puts "Number of files that share size and file start with at least one other file: " + file_start_dups.flatten.size.to_s
-      puts "Number for files that share size and SHA256 hash with at least one other file: " + file_hash_dups.flatten.size.to_s
+      puts "Number for files that share size and hash (SHA1) with at least one other file: " + file_hash_dups.flatten.size.to_s
     end
     [file_hash_dups, file_stats]
   end
