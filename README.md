@@ -59,7 +59,7 @@ The compiled Crystal version seems quite a lot faster compared with the Ruby ver
 	7301,/home/share/photos/Foto_2020/2020_iPhone1_2/IMG_4180.JPG
 	   36m09.42s real    15m38.62s user     7m48.83s system
 
-Crystal version is roughly 70 times faster than the ruby version.
+Crystal version is roughly 70 times faster than the Ruby version.
 
 	time ./dedup /home/share/photos -debug 
 	Total number of analyzed files: 70033
@@ -86,18 +86,29 @@ Both version produce the same result.
 
 ### Runtime issues
 
-If you have problem like
+If you have problem like the following in the compiled Crystal version.
 
 	Unhandled exception: Error opening file '...' with mode 'r': Too many open files (Errno)	
 	Failed to raise an exception: END_OF_STACK
 	[0xce853fd8706] __crystal_sigfault_handler +39750
 	...
 
-It actually is a stack limitation issue.
+It actually is a stack limitation issue. You may need to raise the stack limitation of your OS.
 
-Raise the stack limitation in `login.conf` if needed.
+On e.g. OpenBSD change stack limitation in [login.conf](https://man.openbsd.org/login.conf.5).
 
-In `login.conf` for your `user` running the script:
+If your user is associted with the `staff` login class, change stack limitation in `login.conf` as follows.
 
-	user:\
+	staff:\
 		:stacksize-cur=32M:
+
+You can check your login class via `userinfo <user>`.
+
+	$ userinfo peter
+	login	peter
+	passwd	*
+	uid	1000
+	groups	peter wheel
+	change	NEVER
+	class	staff
+	...
