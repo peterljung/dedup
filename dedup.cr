@@ -35,7 +35,7 @@ class Dedup
 
   # Get all files as a hash size as key and list of files as value
   def get_files_with_sizes(path)
-    file_size = {} of UInt64 => Array(String)
+    file_size = {} of Int64 => Array(String)
     file_stats = {} of String => UInt32
     Dir.glob("#{path}/**/*").each do |path|
       if File.directory?(path)
