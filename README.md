@@ -21,18 +21,18 @@ In the future there is an opportunity to adapt the Crystal version to a parallel
 
 Use ruby 2.3 or later
 
-    ./dedup.rb <folder> [-debug]
+    ./dedup.rb <folder> [-debug] [-dedup]
 
 ### Run crystal version
 
 Build and run using crystal 1.4 or later
 
-    crystal run dedup.cr -- <folder> [-debug]
+    crystal run dedup.cr -- <folder> [-debug] [-dedup]
 
 Build release and then run executable
 
     crystal build dedup.cr --release --no-debug
-    ./dedup <folder> [-debug]
+    ./dedup <folder> [-debug] [-dedup]
 
 ### Performance
 
@@ -83,6 +83,23 @@ Crystal version is roughly 70 times faster than the Ruby version.
 	    0m43.59s real     0m14.33s user     0m20.46s system
 
 Both version produce the same result.
+
+### Deduplication
+
+It is possible to add `-dedup` flag to command to de-duplicate identical copies of files.
+
+This feature make use of UNIX hard links and is only useful on UNIX file systems with hard link support.
+
+File names that previously pointed to multiple copies of files with same content, will after deduplication, point to a single file (with a single i-node nunber). The required space is also reduced to a single file.
+
+To check the result after deduplication `ls` and `du` can be used.
+
+	ls -lRi <folder>
+	du -h <folder>
+
+The `-i` flag will print i-node numbers for each file. Disk usage command will give the resulting space used by folder.
+
+Do some tests on a copy of a folder BEFORE you use this on you complete photo catalog to make sure the tool does what you expect.
 
 ### Runtime issues
 
