@@ -98,8 +98,28 @@ class Dedup
     ans.values.select { |g| g.size > 1 }
   end
 
+  # De-duplicate set of identical files using UNIX hard links
+  def dedup(paths)
+    if (paths.size > 1)
+      f, fs = paths[0], paths[1..]
+      # Make sure files has same content
+      differ = fs.any? { |p| !File.same_content?(f, p) }
+      unless differ
+        fs.each do |p|
+          # And not already linked file
+          unless File.same?(f, p)
+            tmp = p + ".dedup"
+            File.rename(p, tmp)
+            File.link(f, p)
+            File.delete(tmp)
+          end
+        end
+      end
+    end
+  end
+
   # Do dedup analysis
-  def dedup(path, debug = false)
+  def find_duplicates(path, debug = false)
     files_w_size, file_stats = get_files_with_sizes(path)
     # Skip empty files
     files_w_size.delete(0)
@@ -119,11 +139,15 @@ class Dedup
   end
 end
 
-unless ARGV.size == 1 || ARGV.size == 2 && ARGV.includes?("-debug")
+if ARGV.size == 0
   puts
-  puts "Usage: crystal run dedup.cr -- folder [-debug]"
+  puts "Usage: crystal run dedup.cr -- folder [-help] [-debug] [-dedup]"
+  puts "       crystal build dedup.cr"
   puts
   puts "List all files that are duplicates based on content hash"
+  puts
+  puts "    -debug  shows files with extensions not supported by this program"
+  puts "    -dedup  performs deduplication (i.e. hard links) of all found duplicate files"
   puts
   puts "Output as:"
   puts "Index of duplication, filename"
@@ -141,11 +165,19 @@ end
 
 # Configure as needed ...
 debug = ARGV.includes?("-debug")
+dodedup = ARGV.includes?("-dedup")
+folder = ARGV[0]
+
 included_file_exts = ["mp3", "mp4", "ogg", "flac", "wav", "aiff", "mid", "png", "jpg", "gif", "bmp", "tga", "jpeg", "tif", "tiff", "nef", "pdf", "mov"]
+
+unless File.directory?(folder)
+  puts "Given folder is not valid"
+  exit
+end
 
 # Perform dedup analysis
 dedup = Dedup.new(included_file_exts)
-dups, fstats = dedup.dedup(ARGV[0], debug)
+dups, fstats = dedup.find_duplicates(folder, debug)
 
 if debug
   uncovered_exts = fstats.select { |ext, _|
@@ -165,4 +197,5 @@ dups.each_with_index { |g, i|
   g.each { |f|
     puts "#{i.to_s},#{f.to_s}"
   }
+  dedup.dedup(g) if dodedup
 }
