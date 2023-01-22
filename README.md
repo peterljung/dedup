@@ -15,7 +15,7 @@ There are two version of this tool.
 
 The compiled version in Crystal is a bit faster than the Ruby version.
 
-In the future there is an opportunity to adapt the Crystal version to a parallel version to make use of all CPU cores. But as of version 0.35, Crystal still only support [concurrency](https://crystal-lang.org/reference/guides/concurrency.html) and not true parallelism.
+In the future there is an opportunity to adapt the Crystal version to a parallel version to make use of all CPU cores. But as of version 1.7, Crystal still only support [concurrency](https://crystal-lang.org/reference/guides/concurrency.html) and not true parallelism.
 
 ### Run ruby version
 
@@ -25,7 +25,7 @@ Use ruby 2.3 or later
 
 ### Run crystal version
 
-Build and run using crystal 30.1 or later
+Build and run using crystal 1.4 or later
 
     crystal run dedup.cr -- <folder> [-debug]
 
