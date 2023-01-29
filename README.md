@@ -115,6 +115,24 @@ The `-i` flag will print i-node numbers for each file. Disk usage command will g
 
 Do some tests on a copy of a folder BEFORE you use this on you complete photo catalog to make sure the tool does what you expect.
 
+### Process duplicates
+
+You can make a simple script that process the output
+
+For instance this script (`process.rb`) filters out the first occurance of each file group
+
+	#!/usr/bin/env ruby
+		
+	prev = -1
+	ARGF.each do |l|
+		cur = l.split(",")[0].to_i
+		if cur != prev
+			prev = cur
+		else
+			puts l
+		end
+	end
+
 ### Runtime issues
 
 If you have problem like the following in the compiled Crystal version.

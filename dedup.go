@@ -25,11 +25,12 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 func help() {
-	s := "Usage: go run cli/main.go <folder>\n" +
-		"       go build cli/main.go\n" +
+	s := "Usage: go run dedup.go <folder>\n" +
+		"       go build dedup.go\n" +
 		"\n" +
 		"List all files that are duplicates based on content hash\n" +
 		"\n" +
@@ -39,9 +40,9 @@ func help() {
 }
 
 func validSuffix(f string) bool {
-	exts := []string{".mp3", ".mp4", ".ogg", ".flac", ".wav", ".aiff", ".mid", ".png", ".jpg", ".gif", ".bmp", ".tga",
-		".jpeg", ".tif", ".tiff", ".nef", ".pdf", ".mov"}
-	e := path.Ext(f)
+	exts := []string{"mp3", "mp4", "ogg", "flac", "wav", "aiff", "mid", "png", "jpg", "gif", "bmp", "tga",
+		"jpeg", "tif", "tiff", "nef", "pdf", "mov", "psd", "heic"}
+	e := strings.ToLower(strings.TrimPrefix(path.Ext(f), "."))
 	for _, x := range exts {
 		if x == e {
 			return true
@@ -51,8 +52,9 @@ func validSuffix(f string) bool {
 }
 
 // Group all files by file size recursively under path
-func groupBySize(path string) (map[int64][]string, error) {
+func groupBySize(path string) (map[int64][]string, int, error) {
 	ans := make(map[int64][]string)
+	n := 0
 	if err := filepath.WalkDir(path, func(path string, info fs.DirEntry, err error) error {
 		if err == nil &&
 			!info.IsDir() &&
@@ -63,6 +65,7 @@ func groupBySize(path string) (map[int64][]string, error) {
 					ans[size] = make([]string, 0)
 				}
 				ans[size] = append(ans[size], path)
+				n += 1
 				return nil
 			} else {
 				return err
@@ -71,9 +74,9 @@ func groupBySize(path string) (map[int64][]string, error) {
 			return err
 		}
 	}); err == nil {
-		return ans, nil
+		return ans, n, nil
 	} else {
-		return ans, err
+		return ans, n, err
 	}
 }
 
@@ -127,33 +130,34 @@ func main() {
 		os.Exit(0)
 	}
 	// Group by file size
-	sizeMap, err := groupBySize(path)
+	sizeMap, n, err := groupBySize(path)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(0)
 	}
 	// Group by first 8192 bytes of each file
-	startGs := make([][]string, 0)
+	startMap := make([][]string, 0)
 	for _, g := range sizeMap {
 		sg := groupByContent(g, 8192)
 		for _, g := range sg {
 			if len(g) > 1 {
-				startGs = append(startGs, g)
+				startMap = append(startMap, g)
 			}
 		}
 	}
 	// Group by whole file
-	fileGs := make([][]string, 0)
-	for _, g := range startGs {
+	fileMap := make([][]string, 0)
+	for _, g := range startMap {
 		sg := groupByContent(g, 0)
 		for _, g := range sg {
 			if len(g) > 1 {
-				fileGs = append(fileGs, g)
+				fileMap = append(fileMap, g)
 			}
 		}
 	}
 	// Print final groups
-	for i, fs := range startGs {
+	fmt.Printf("%d files grouped in %d groups by file size, (%d, %d) by content\n", n, len(sizeMap), len(startMap), len(fileMap))
+	for i, fs := range fileMap {
 		for _, f := range fs {
 			fmt.Printf("%d,%s\n", i, f)
 		}

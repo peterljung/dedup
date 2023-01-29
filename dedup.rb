@@ -154,7 +154,8 @@ debug = ARGV.include?("-debug")
 dodedup = ARGV.include?("-dedup")
 folder = ARGV[0]
 
-included_file_exts = ["mp3", "mp4", "ogg", "flac", "wav", "aiff", "mid", "png", "jpg", "gif", "bmp", "tga", "jpeg", "tif", "tiff", "nef", "pdf", "mov"]
+included_file_exts = ["mp3", "mp4", "ogg", "flac", "wav", "aiff", "mid", "png", "jpg", "gif", "bmp", "tga", "jpeg", "tif",
+                      "tiff", "nef", "pdf", "mov", "psd", "heic"]
 
 unless File.directory?(folder)
   puts "Given folder is not valid"
