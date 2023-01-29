@@ -8,12 +8,15 @@ The tool take a single folder and determine duplicates as output.
 
 ## Install and usage
 
-There are two version of this tool.
+There are three version of this tool.
 
 * One in plain [Ruby](https://www.ruby-lang.org/en/)
 * One in compiled [Crystal](https://crystal-lang.org/)
+* One in [Go](https://go.dev/)
 
-The compiled version in Crystal is a bit faster than the Ruby version.
+The compiled version in Crystal is quite a bit faster than the Ruby version.
+
+The go version is also fast.
 
 In the future there is an opportunity to adapt the Crystal version to a parallel version to make use of all CPU cores. But as of version 1.7, Crystal still only support [concurrency](https://crystal-lang.org/reference/guides/concurrency.html) and not true parallelism.
 
@@ -33,6 +36,17 @@ Build release and then run executable
 
     crystal build dedup.cr --release --no-debug
     ./dedup <folder> [-debug] [-dedup]
+
+### Run go version
+
+Build and run using go 1.17 or later
+
+    go run dedup.go <folder>
+
+Build release and then run executable
+
+    go build dedup.go
+    ./dedup <folder>
 
 ### Performance
 
